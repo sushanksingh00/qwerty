@@ -51,37 +51,18 @@ def login_required(f):
 
 
 def lookup(symbol):
-    """Look up quote for symbol."""
+    api_key = "62XB667W6KPDU65M"  # Replace with your Alpha Vantage API key
+    url = f"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={symbol}&apikey={api_key}"
+    response = requests.get(url)
+    data = response.json()
 
-    # Prepare API request
-    symbol = symbol.upper()
-    end = datetime.datetime.now(pytz.timezone("US/Eastern"))
-    start = end - datetime.timedelta(days=7)
-
-    # Yahoo Finance API
-    url = (
-        f"https://query1.finance.yahoo.com/v7/finance/download/{urllib.parse.quote_plus(symbol)}"
-        f"?period1={int(start.timestamp())}"
-        f"&period2={int(end.timestamp())}"
-        f"&interval=1d&events=history&includeAdjustedClose=true"
-    )
-
-    # Query API
-    try:
-        response = requests.get(
-            url,
-            cookies={"session": str(uuid.uuid4())},
-            headers={"Accept": "*/*", "User-Agent": request.headers.get("User-Agent")},
-        )
-        response.raise_for_status()
-
-        # CSV header: Date,Open,High,Low,Close,Adj Close,Volume
-        quotes = list(csv.DictReader(response.content.decode("utf-8").splitlines()))
-        price = round(float(quotes[-1]["Adj Close"]), 2)
-        return {"price": price, "symbol": symbol}
-    except (KeyError, IndexError, requests.RequestException, ValueError):
+    if "Global Quote" in data:
+        price = float(data["Global Quote"]["05. price"])
+        return {"price": round(price, 2), "symbol": symbol.upper()}
+    else:
+        print(f"Error: {data}")
         return None
-
+    
 
 def usd(value):
     """Format value as USD."""
