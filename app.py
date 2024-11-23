@@ -215,49 +215,35 @@ def quote():
     else:
         return render_template("quote.html")
 
+
 @app.route("/register", methods=["GET", "POST"])
 def register():
     """Register user"""
     if request.method == "POST":
-        # Debugging print statements
-        print("Form Data:", request.form)
-
-        c.execute("SELECT * FROM users WHERE username = ?", (request.form.get("username"),))
+        c.execute(
+            "SELECT * FROM users WHERE username = ?", (request.form.get("username"),))
         rows = c.fetchall()
-        print("Existing Users:", rows)
 
         if rows != []:
             return apology('Username Taken', 400)
 
-        if not request.form.get('username'):
+        if not request.form.get('username') :
             return apology('Must provide Username', 400)
 
         elif not request.form.get('password') or not request.form.get('confirmation'):
             return apology('Must provide Password', 400)
 
-        elif request.form.get('confirmation') != request.form.get('password'):
-            return apology('Passwords do not match', 400)
+        elif (request.form.get('confirmation') != request.form.get('password')):
+            return apology('Password do not match', 400)
 
-        hashed_password = generate_password_hash(
-            request.form.get('password'), method='pbkdf2:sha256', salt_length=8
-        )
-        print("Hashed Password:", hashed_password)
+        hashed_password = generate_password_hash(request.form.get('password'), method='pbkdf2:sha256', salt_length=8)
 
-        # Attempt to insert into the database
-        try:
-            db.execute(
-                'INSERT INTO users (username, hash) VALUES (?, ?)',
-                (request.form.get('username'), hashed_password)
-            )
-            db.commit()
-        except sqlite3.Error as e:
-            print("Database Error:", e)
-            return apology("Database Error", 500)
+        db.execute('INSERT INTO users (username, hash) values(?, ?)', (request.form.get('username'), hashed_password))
+        db.commit()
 
         return redirect('/login')
     else:
         return render_template("register.html")
-
 
 #chatpgt copied fn
 @app.route("/sell", methods=["GET", "POST"])
