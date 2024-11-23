@@ -1,7 +1,6 @@
 flask
 flask-session
 werkzeug
-sqlite3
 cs50
 requests
 
