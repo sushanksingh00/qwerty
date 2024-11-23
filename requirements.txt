@@ -3,6 +3,8 @@ flask-session
 werkzeug
 cs50
 requests
+pipdeptree
+
 
 
 annotated-types==0.7.0
